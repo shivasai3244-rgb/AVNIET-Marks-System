@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Gesture Vocalizer</title>
+</head>
+<body>
+  <h2>Hand Gesture Output</h2>
+  <button onclick="connect()">Connect Bluetooth</button>
+  <p id="output">Waiting...</p>
+
+<script>
+let device, characteristic;
+
+async function connect() {
+  device = await navigator.bluetooth.requestDevice({
+    acceptAllDevices: true,
+    optionalServices: ['00001101-0000-1000-8000-00805f9b34fb']
+  });
+
+  const server = await device.gatt.connect();
+  const service = await server.getPrimaryService('00001101-0000-1000-8000-00805f9b34fb');
+  characteristic = await service.getCharacteristic('00001101-0000-1000-8000-00805f9b34fb');
+
+  characteristic.startNotifications();
+  characteristic.addEventListener('characteristicvaluechanged', handleData);
+}
+
+function handleData(event) {
+  let value = new TextDecoder().decode(event.target.value);
+  document.getElementById("output").innerText = value;
+
+  let speech = new SpeechSynthesisUtterance(value);
+  speechSynthesis.speak(speech);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Avniet Exam Branch - Student Marks Management System">
+  <title>Avniet Exam Branch</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Animated Background -->
+  <div class="bg-animation">
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+  </div>
+
+  <div id="app-shell" style="display: none; height: 100vh; overflow: hidden;">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">🎓</div>
+        <h3>AVNIET</h3>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" onclick="goToDashboard()" class="nav-item active" id="nav-dashboard">
+          <span class="nav-icon">📊</span>
+          <span class="nav-text">Dashboard</span>
+        </a>
+        <a href="#" onclick="handleLogout()" class="nav-item">
+          <span class="nav-icon">🚪</span>
+          <span class="nav-text">Logout</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="avatar">A</div>
+          <div class="user-details">
+            <p class="user-name">Admin</p>
+            <p class="user-role">Exam Branch</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <header class="main-header">
+        <div id="breadcrumb" class="breadcrumb"></div>
+        <div class="header-actions">
+           <div id="toast" class="toast"></div>
+        </div>
+      </header>
+      
+      <div class="content-body" id="view-container">
+        <!-- Views will be rendered here -->
+      </div>
+    </main>
+  </div>
+
+  <!-- ===== LOGIN VIEW ===== -->
+  <div id="login-view" class="view active">
+    <div class="login-container">
+      <div class="login-logo">
+        <div class="logo-icon">🎓</div>
+        <h1>Avniet Exam Branch</h1>
+        <p>Student Marks Management System</p>
+      </div>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" placeholder="Enter username" autocomplete="username" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" required>
+        </div>
+        <div style="text-align: right; margin-top: -10px; margin-bottom: 16px;">
+          <a href="#" onclick="openForgotPasswordModal()" style="color: var(--accent-blue); font-size: 0.85rem; text-decoration: none;">Forgot Password?</a>
+        </div>
+        <button type="submit" class="btn btn-primary">🔐 Sign In</button>
+        <div id="login-error" class="login-error"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== FORGOT PASSWORD MODAL ===== -->
+  <div id="forgot-password-modal" class="modal-overlay">
+    <div class="modal">
+      <h3>🔄 Reset Credentials</h3>
+      <p>Enter your new username and password for the system.</p>
+      <form id="forgot-password-form" onsubmit="handleResetPassword(event)" style="margin-top: 16px;">
+        <div class="form-group">
+          <label for="new-username">New Username</label>
+          <input type="text" id="new-username" autocomplete="off" placeholder="Enter new username" required>
+        </div>
+        <div class="form-group">
+          <label for="new-password">New Password</label>
+          <input type="password" id="new-password" autocomplete="new-password" placeholder="Enter new password" required>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 12px;">
+          <button type="submit" class="btn btn-primary" style="flex:1;">Save</button>
+          <button type="button" class="modal-close" onclick="closeForgotPasswordModal()" style="flex:1;">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Views (Hidden by default, moved via JS) -->
+  <div id="views-source" style="display: none;">
+    
+    <!-- DASHBOARD VIEW -->
+    <div id="dashboard-view" class="view">
+      <div class="page-content">
+        <div class="welcome-banner">
+          <h1>Welcome, Admin 👋</h1>
+          <p>Please select a department to begin managing student marks and attainment.</p>
+        </div>
+        <div id="dept-grid" class="dept-grid"></div>
+      </div>
+    </div>
+
+    <!-- YEAR/SEM VIEW -->
+    <div id="yearsem-view" class="view">
+      <div class="page-content">
+        <button class="btn-back" onclick="goToDashboard()">← Back</button>
+        <h1 class="page-title" id="yearsem-dept-name">Select Year & Semester</h1>
+        <div id="yearsem-grid" class="year-sem-grid"></div>
+      </div>
+    </div>
+
+    <!-- SUBJECTS VIEW -->
+    <div id="subjects-view" class="view">
+      <div class="page-content">
+        <button class="btn-back" onclick="goToDept()">← Back</button>
+        <h1 class="page-title" id="subjects-title">Subjects</h1>
+        <div id="subjects-list" class="subjects-list"></div>
+      </div>
+    </div>
+
+    <!-- MARKS ENTRY VIEW -->
+    <div id="marks-view" class="view">
+      <div class="page-content">
+        <button class="btn-back" onclick="goBackFromMarks()">← Back</button>
+        
+        <div class="marks-hero">
+          <div class="hero-info">
+            <h2 id="marks-subject-title">Subject</h2>
+            <div class="hero-badges">
+              <span id="marks-dept-badge" class="badge">ECE</span>
+              <span id="marks-year-badge" class="badge">Year/Sem</span>
+              <span id="marks-section-badge" class="badge">Section</span>
+            </div>
+          </div>
+          <div class="hero-actions">
+            <button class="btn btn-success" onclick="saveMarks()">💾 Save All</button>
+            <button class="btn btn-attainment" onclick="calculateAndShowAttainment()">📊 View Attainment</button>
+            <button class="btn btn-secondary" onclick="downloadExcel()">📥 Download</button>
+          </div>
+        </div>
+
+        <!-- ASSESSMENT TABS -->
+        <div class="assessment-tabs">
+          <button class="assess-tab active" onclick="switchAssessTab('mid1')">MID-I</button>
+          <button class="assess-tab" onclick="switchAssessTab('mid2')">MID-II</button>
+          <button class="assess-tab" onclick="switchAssessTab('quiz')">Quiz</button>
+          <button class="assess-tab" onclick="switchAssessTab('assign')">Assignment/PPT</button>
+          <button class="assess-tab" onclick="switchAssessTab('end')">End Exam & Survey</button>
+        </div>
+
+        <div class="table-card">
+          <div class="table-container">
+            <table class="marks-table">
+              <thead id="marks-thead"></thead>
+              <tbody id="marks-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid" id="stats-panel"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CONFIGURATION MODAL ===== -->
+  <div id="config-modal" class="modal-overlay config-modal-overlay">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3>⚙️ Subject Configuration</h3>
+        <p id="config-subject-name">Subject Name</p>
+      </div>
+
+      <div class="config-tabs">
+        <button class="tab-btn active" onclick="switchConfigTab('mid1')">MID-I</button>
+        <button class="tab-btn" onclick="switchConfigTab('mid2')">MID-II</button>
+        <button class="tab-btn" onclick="switchConfigTab('quiz')">Quiz</button>
+        <button class="tab-btn" onclick="switchConfigTab('assignment')">Assignment</button>
+        <button class="tab-btn" onclick="switchConfigTab('ppt')">PPT</button>
+        <button class="tab-btn" onclick="switchConfigTab('copo')">CO-PO Matrix</button>
+      </div>
+
+      <div id="config-content" class="config-content">
+        <!-- Dynamic content goes here -->
+      </div>
+
+      <div class="modal-footer" style="display: flex; gap: 10px; margin-top: 20px;">
+        <button class="btn btn-primary" onclick="saveSubjectConfig()" style="flex:1;">💾 Save Config</button>
+        <button class="modal-close" onclick="closeConfigModal()" style="flex:1;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ATTAINMENT MODAL ===== -->
+  <div id="attainment-modal" class="modal-overlay config-modal-overlay">
+    <div class="modal modal-lg" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3>📊 CO-PO Attainment Results</h3>
+        <p id="attainment-subject-name">Subject Name</p>
+      </div>
+
+      <div class="config-tabs">
+        <button class="tab-btn active" onclick="switchAttainTab('co')">CO Attainment</button>
+        <button class="tab-btn" onclick="switchAttainTab('po')">PO Attainment</button>
+      </div>
+
+      <div id="attainment-content" class="config-content">
+        <!-- Dynamic content goes here -->
+      </div>
+
+      <div class="modal-footer" style="margin-top: 20px;">
+        <button class="modal-close" onclick="closeAttainmentModal()" style="width: 100%;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MARKS LOGIN MODAL ===== -->
+  <div id="marks-login-modal" class="modal-overlay">
+    <div class="modal">
+      <h3>🔐 Login to Mark Attendance</h3>
+      <p id="marks-login-subject-name">Subject Name</p>
+      <form id="marks-login-form" onsubmit="handleMarksLogin(event)" style="margin-top: 16px;">
+        <div class="form-group">
+          <label for="marks-username">Username</label>
+          <input type="text" id="marks-username" placeholder="Enter username" required>
+        </div>
+        <div class="form-group">
+          <label for="marks-password">Password</label>
+          <input type="password" id="marks-password" placeholder="Enter subject code" required>
+          <div style="text-align: right; margin-top: 6px;">
+            <a href="#" onclick="showPasswordHint(event)" style="color: var(--accent-blue); font-size: 0.8rem; text-decoration: none;">Forgot Password?</a>
+          </div>
+        </div>
+        <div id="marks-login-error" class="login-error"></div>
+        <div style="display: flex; gap: 10px; margin-top: 12px;">
+          <button type="submit" class="btn btn-primary" style="flex:1;">🔓 Login</button>
+          <button type="button" class="modal-close" onclick="closeMarksLoginModal()" style="flex:1;">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== SECTION SELECTION MODAL ===== -->
+  <div id="section-modal" class="modal-overlay">
+    <div class="modal">
+      <h3>Select Section</h3>
+      <p id="modal-subject-name">Subject Name</p>
+      <div class="section-buttons">
+        <button class="section-btn" onclick="selectSection('A')">
+          <div class="sec-icon">🅰️</div>
+          <span class="sec-label">Section A</span>
+
+        </button>
+        <button class="section-btn" onclick="selectSection('B')">
+          <div class="sec-icon">🅱️</div>
+          <span class="sec-label">Section B</span>
+
+        </button>
+      </div>
+      <button class="modal-close" onclick="closeSectionModal()">Cancel</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
